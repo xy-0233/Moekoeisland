@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>MoeKoeIsland 控制台</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d0f12;
+      --panel: #171a1f;
+      --panel-2: #111419;
+      --line: rgba(255, 255, 255, .09);
+      --muted: #8d94a3;
+      --text: #f4f7fb;
+      --soft: #c8ced8;
+      --cyan: #56d7ff;
+      --green: #56f0a2;
+      --amber: #ffc75f;
+      --red: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      width: 360px;
+      min-height: 540px;
+      padding: 14px;
+      background:
+        radial-gradient(circle at 18% -10%, rgba(86, 215, 255, .18), transparent 35%),
+        linear-gradient(180deg, #16191f 0%, var(--bg) 42%, #08090b 100%);
+      color: var(--text);
+      font: 13px/1.45 "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", sans-serif;
+      user-select: none;
+    }
+    button, input { font: inherit; }
+    header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    header img { width: 32px; height: 32px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0, 0, 0, .24); }
+    .titles { flex: 1; min-width: 0; }
+    .name { font-size: 14px; font-weight: 700; }
+    .ver { color: var(--muted); font-size: 11px; margin-top: 1px; }
+    .status-pill {
+      height: 24px; padding: 0 9px; border: 1px solid var(--line); border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 6px; color: var(--soft);
+      background: rgba(255, 255, 255, .04); font-size: 11.5px; white-space: nowrap;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #687080; box-shadow: 0 0 0 3px rgba(255, 255, 255, .05); }
+    .dot.on { background: var(--green); box-shadow: 0 0 12px rgba(86, 240, 162, .65); }
+    .dot.warn { background: var(--amber); box-shadow: 0 0 12px rgba(255, 199, 95, .55); }
+    .dot.off { background: #687080; }
+    .hero {
+      position: relative; min-height: 142px; border: 1px solid var(--line); border-radius: 8px;
+      padding: 14px 12px 12px; background: linear-gradient(145deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .025)), #101319;
+      overflow: hidden; margin-bottom: 10px;
+    }
+    .island-preview {
+      height: 44px; max-width: 290px; margin: 0 auto 24px; padding: 6px 12px 6px 7px;
+      border-radius: 22px; background: rgba(6, 7, 9, .82); border: 1px solid rgba(255, 255, 255, .1);
+      box-shadow: 0 12px 38px rgba(0, 0, 0, .45); display: flex; align-items: center; gap: 9px;
+    }
+    .cover { width: 31px; height: 31px; border-radius: 8px; background: linear-gradient(135deg, #56d7ff, #f3cf69 52%, #ff7b8f); flex: none; }
+    .lyric-copy { min-width: 0; flex: 1; }
+    .lyric-main, .taskbar-main { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; letter-spacing: 0; }
+    .lyric-main { font-size: 13px; }
+    .lyric-sub, .taskbar-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: 11px; margin-top: 1px; }
+    .taskbar-preview {
+      position: absolute; left: 10px; right: 10px; bottom: 10px; height: 38px; border-radius: 6px;
+      background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .08);
+      display: grid; grid-template-columns: 76px minmax(0, 1fr) 52px; align-items: center; gap: 8px; padding: 0 9px;
+    }
+    .taskbar-icons { display: flex; gap: 6px; }
+    .taskbar-icons span { width: 18px; height: 18px; border-radius: 50%; background: rgba(255, 255, 255, .13); }
+    .taskbar-clock { justify-self: end; color: var(--muted); font-size: 11px; }
+    .panel { border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin-bottom: 10px; background: rgba(255, 255, 255, .045); }
+    .panel-title { display: flex; justify-content: space-between; align-items: center; color: var(--soft); font-size: 12px; margin-bottom: 8px; }
+    .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 4px; border-radius: 8px; background: rgba(0, 0, 0, .24); }
+    .segmented button { height: 30px; border: 0; border-radius: 6px; color: var(--muted); background: transparent; cursor: pointer; }
+    .segmented button.active { color: #071013; background: linear-gradient(180deg, #75e0ff, #42c9f3); font-weight: 700; }
+    .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 34px; color: var(--soft); }
+    .switch-row + .switch-row { border-top: 1px solid rgba(255, 255, 255, .06); }
+    .switch-copy strong { display: block; color: var(--text); font-size: 12.5px; font-weight: 650; }
+    .switch-copy span { display: block; color: var(--muted); font-size: 11px; margin-top: 1px; }
+    .switch { position: relative; width: 38px; height: 22px; flex: none; }
+    .switch input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .slider { position: absolute; inset: 0; border-radius: 999px; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .08); transition: background .16s, border-color .16s; }
+    .slider::after { content: ""; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px; border-radius: 50%; background: #f5f7fb; transition: transform .16s; }
+    .switch input:checked + .slider { background: rgba(86, 215, 255, .92); border-color: transparent; }
+    .switch input:checked + .slider::after { transform: translateX(16px); }
+    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .metric { min-width: 0; padding: 8px; border-radius: 7px; background: var(--panel-2); border: 1px solid rgba(255, 255, 255, .06); }
+    .metric span { display: block; color: var(--muted); font-size: 11px; margin-bottom: 2px; }
+    .metric strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; font-weight: 650; }
+    .transport { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+    .icon-button, .ghost-button, .primary-button {
+      border: 1px solid rgba(255, 255, 255, .09); border-radius: 8px; color: var(--text);
+      cursor: pointer; transition: transform .1s, border-color .16s, background .16s;
+    }
+    .icon-button { height: 42px; background: rgba(255, 255, 255, .055); display: flex; align-items: center; justify-content: center; }
+    .icon-button.primary { color: #071013; background: linear-gradient(180deg, #78e0ff, #45c8f2); border-color: transparent; box-shadow: 0 8px 24px rgba(69, 200, 242, .26); }
+    .icon-button:hover, .ghost-button:hover, .primary-button:hover { border-color: rgba(86, 215, 255, .52); background-color: rgba(86, 215, 255, .13); }
+    .icon-button:active, .ghost-button:active, .primary-button:active { transform: scale(.97); }
+    .icon-button svg { width: 19px; height: 19px; fill: currentColor; }
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .ghost-button, .primary-button { height: 34px; background: rgba(255, 255, 255, .045); color: var(--soft); }
+    .primary-button { grid-column: 1 / -1; color: #071013; background: linear-gradient(180deg, #f8d979, #f0b85b); border-color: transparent; font-weight: 700; }
+    .hint { display: flex; gap: 8px; padding: 9px 10px; border-radius: 8px; color: #a9d8ff; background: rgba(86, 215, 255, .08); border: 1px solid rgba(86, 215, 255, .17); font-size: 11.5px; line-height: 1.55; }
+    .hint.hide { display: none; }
+    .hint.err { color: #ffc8c8; background: rgba(255, 107, 107, .1); border-color: rgba(255, 107, 107, .26); }
+    .hint b { color: inherit; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="icons/icon256.png" alt="MoeKoeIsland">
+    <div class="titles">
+      <div class="name">MoeKoeIsland</div>
+      <div class="ver" id="ver">组件版本 —</div>
+    </div>
+    <div class="status-pill" title="本地组件状态">
+      <span class="dot" id="hostDot"></span>
+      <span id="hostState">检测中</span>
+    </div>
+  </header>
+
+  <section class="hero" aria-label="显示预览">
+    <div class="island-preview">
+      <div class="cover"></div>
+      <div class="lyric-copy">
+        <div class="lyric-main" id="previewLyric">正在等待 MoeKoe Music</div>
+        <div class="lyric-sub" id="previewSub">连接后显示当前歌词与翻译</div>
+      </div>
+    </div>
+    <div class="taskbar-preview">
+      <div class="taskbar-icons"><span></span><span></span><span></span></div>
+      <div class="lyric-copy">
+        <div class="taskbar-main" id="taskbarMain">任务栏歌词预览</div>
+        <div class="taskbar-sub" id="taskbarSub">hover 展开控制键</div>
+      </div>
+      <div class="taskbar-clock">23:04</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title">
+      <span>显示模式</span>
+      <span id="modeLabel">—</span>
+    </div>
+    <div class="segmented">
+      <button type="button" data-mode="island">灵动岛</button>
+      <button type="button" data-mode="taskbar">任务栏</button>
+      <button type="button" data-mode="both">双显示</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="switch-row">
+      <div class="switch-copy">
+        <strong>歌词翻译</strong>
+        <span>副行显示翻译，无翻译时预览下一句</span>
+      </div>
+      <label class="switch"><input type="checkbox" id="swTrans"><span class="slider"></span></label>
+    </div>
+    <div class="switch-row">
+      <div class="switch-copy">
+        <strong>开机自启</strong>
+        <span>随 Windows 自动启动本地组件</span>
+      </div>
+      <label class="switch"><input type="checkbox" id="autostart"><span class="slider"></span></label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title"><span>运行状态</span><span id="connState">—</span></div>
+    <div class="status-grid">
+      <div class="metric"><span>播放器</span><strong id="playerState">—</strong></div>
+      <div class="metric"><span>本地桥接</span><strong id="bridgeState">—</strong></div>
+      <div class="metric" style="grid-column:1 / -1"><span>当前歌曲</span><strong id="songName">—</strong></div>
+    </div>
+  </section>
+
+  <div class="transport">
+    <button class="icon-button" id="prev" title="上一曲">
+      <svg viewBox="0 0 24 24"><path d="M6 6h2.2v12H6zM19.5 6v12L10 12z"/></svg>
+    </button>
+    <button class="icon-button primary" id="toggle" title="播放 / 暂停">
+      <svg viewBox="0 0 24 24" id="toggleIcon"><path d="M8 5.2v13.6L19 12z"/></svg>
+    </button>
+    <button class="icon-button" id="next" title="下一曲">
+      <svg viewBox="0 0 24 24"><path d="M15.8 6H18v12h-2.2zM4.5 6v12L14 12z"/></svg>
+    </button>
+  </div>
+
+  <div class="action-grid">
+    <button class="ghost-button" id="refresh">刷新状态</button>
+    <button class="ghost-button" id="openDir">配置目录</button>
+    <button class="primary-button" id="openSettings">打开完整外观设置</button>
+  </div>
+
+  <input type="checkbox" id="swIsland" hidden>
+  <input type="checkbox" id="swTaskbar" hidden>
+
+  <div class="hint" id="hint">
+    首次使用请在 MoeKoe 的「插件管理」中<b>授权</b>本地组件。
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
