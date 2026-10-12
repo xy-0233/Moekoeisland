@@ -2,8 +2,9 @@
 *.exe
 # 例外：仓库根目录的发行版安装包需要上传
 !MoeKoeIsland-*.exe
-# 例外：扩展包内的 native host 二进制，manifest.json 的 moekoe_native_hosts 引用它，必须入库
-!**/bin/win32/MoeKoeIsland.exe
+# 例外：扩展包内的 native host 二进制（bin/win32/MoeKoeIsland.exe），
+# manifest.json 的 moekoe_native_hosts 引用它，必须入库
+!bin/win32/MoeKoeIsland.exe
 *.o
 *.obj
 *.out
