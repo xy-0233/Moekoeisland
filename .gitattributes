@@ -1,0 +1,3 @@
+# native host 源码按原始字节入库（CRLF，不转换行尾），
+# 以便审核方复核「源码编译结果 == 二进制内嵌字节码」
+native-host/*.py -text

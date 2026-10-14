@@ -1,0 +1,12 @@
+# MoeKoeIsland native host 运行/构建依赖
+#
+# 必需
+PyQt5>=5.15,<6
+
+# 可选：缺失时对应功能自动降级，程序仍可正常运行
+winrt-runtime ; sys_platform == "win32"                 # SMTC 系统媒体控制（首选播放控制通道）
+winrt-Windows.Media.Control ; sys_platform == "win32"   # 同上
+Pillow                                                  # 屏幕取色（外观设置里的「从屏幕取色」）
+
+# 构建用
+pyinstaller>=6.0

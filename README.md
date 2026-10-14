@@ -2,6 +2,19 @@
 
 给 MoeKoe Music 配的桌面歌词组件：**屏幕顶部灵动岛 + 任务栏歌词条**。
 
+## 仓库结构
+
+```
+manifest.json                插件清单（仓库根目录即插件包根目录）
+background.js / bridge.html / bridge.js / popup.html / popup.js   扩展端
+icons/                      插件图标
+bin/win32/MoeKoeIsland.exe  native host 二进制（由 manifest 的 moekoe_native_hosts 引用）
+native-host/                ↑ 该二进制的完整源码与构建配置（见 native-host/README.md）
+```
+
+> `native-host/` 提供 `bin/win32/MoeKoeIsland.exe` 的全部源码与 PyInstaller 配置，
+> 其编译结果与仓库内二进制的内嵌字节码逐项一致，便于审核与复现构建。
+
 ## v1.7.24 重点（拖到屏幕右侧「右边陷进去」根治：空帧预夹）
 
 **需求**（2026-10-10）：「那个灵动岛拖到右侧的时候右边直接陷进去了，你帮我修正一下」
